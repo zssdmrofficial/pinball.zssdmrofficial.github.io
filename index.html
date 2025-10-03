@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>張國問答 + 籌碼彈珠台</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="icon" type="image/x-icon" href="static/images/favicon.ico">
+    <link rel="stylesheet" href="static/css/style.css" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+TC:wght@400;700&display=swap"
+        rel="stylesheet" />
+
+    <!-- 背景動畫 -->
+    <svg style="position: fixed; width: 0; height: 0" aria-hidden="true">
+        <defs>
+            <filter id="liquid_glass_filter" x="-20%" y="-20%" width="140%" height="140%"
+                filterUnits="objectBoundingBox">
+                <feTurbulence type="fractalNoise" baseFrequency="0.01 0.015" numOctaves="2" seed="10" result="noise">
+                    <animate attributeName="baseFrequency" dur="16s" values="0.01 0.015; 0.015 0.01; 0.01 0.015"
+                        repeatCount="indefinite" />
+                </feTurbulence>
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="30" xChannelSelector="R"
+                    yChannelSelector="G" />
+            </filter>
+        </defs>
+    </svg>
+</head>
+
+<body class="no-native-scroll">
+    <!-- 全螢幕背景 -->
+    <div class="full-bg">
+        <img src="static/images/background.png" alt="背景圖" />
+    </div>
+
+    <!-- 卷軸主容器 -->
+    <div id="lg-scroll-root" class="lg-scroll-root" role="region" aria-label="頁面內容可滾動區">
+        <div id="lg-scroll-content" class="lg-scroll-content">
+            <div class="main-container" id="main-content">
+
+                <!-- 彈珠台 + 問答 -->
+                <section class="content-card flex-layout">
+                    <!-- 左邊：彈珠台 -->
+                    <div id="game-area">
+                        <canvas id="pinballCanvas" width="300" height="500"></canvas>
+                        <button id="drop-ball-btn">丟球</button>
+                        <p>目前籌碼：<span id="chips">0</span></p>
+                    </div>
+
+                    <!-- 右邊：問答 -->
+                    <div id="qa-area">
+                        <h2 id="question">題目會出現在這裡</h2>
+                        <div class="options">
+                            <button data-choice="A">選項 A (70)</button>
+                            <button data-choice="B">選項 B (80)</button>
+                            <button data-choice="C">選項 C (90)</button>
+                        </div>
+                        <p id="result"></p>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 自製 Liquid Glass 卷軸 -->
+    <div class="lg-scrollbar" aria-hidden="true">
+        <div class="lg-scrollbar-track"></div>
+        <div class="lg-scrollbar-thumb"></div>
+    </div>
+
+    <!-- JS -->
+    <script src="static/js/pinball.js"></script>
+    <script src="static/js/quiz.js"></script>
+    <script src="static/js/lg-scrollbar.js"></script>
+    <script src="static/js/main.js"></script>
+</body>
+
+</html>
