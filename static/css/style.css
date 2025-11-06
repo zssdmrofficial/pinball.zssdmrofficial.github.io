@@ -14,12 +14,26 @@
     /* 微粉的卡片霧面底，保持可讀性 */
     --content-bg: rgba(255, 255, 255, 0.06);
 
+    /* === 狀態顏色 === */
+    --correct-color: #49ffc2;
+    --wrong-color: #ff6b6b;
+
+
     /* === 圓角與版心 === */
     --radius-ui: 24px;
 }
 
+/* === 基本與背景設定 === */
+body,
+html {
+    margin: 0;
+    font-family: "Noto Sans TC", "Inter", sans-serif;
+    color: var(--text-primary);
+    background: #000;
+    overflow-y: overlay;
+    background-color: transparent;
+}
 
-/* 背景 */
 .full-bg {
     position: fixed;
     top: 0;
@@ -48,27 +62,28 @@
     z-index: -1;
 }
 
-/* 主要容器 */
-body {
-    margin: 0;
-    font-family: "Noto Sans TC", "Inter", sans-serif;
-    color: var(--text-primary);
-    background: #000;
-}
-
 .main-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
     padding: 20px;
+    box-sizing: border-box;
 }
 
-/* 使用了新風格的卡片 */
+.hidden {
+    display: none !important;
+}
+
+/* === 卡片風格 === */
 .content-card {
     background: var(--content-bg);
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(8px);
     border-radius: var(--radius-ui);
     padding: 30px;
-    margin: 20px auto;
     box-shadow: 0 2px 15px color-mix(in srgb, var(--accent-color) 16%, transparent);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .content-card:hover {
@@ -76,21 +91,45 @@ body {
     box-shadow: 0 8px 26px color-mix(in srgb, var(--accent-color) 35%, transparent);
 }
 
+#start-screen {
+    text-align: center;
+    max-width: 450px;
+}
 
-/* 彈珠台+問答橫排 */
+#start-screen ul {
+    list-style: none;
+    padding: 0;
+    text-align: left;
+    max-width: 300px;
+    margin: 20px auto;
+    color: var(--text-secondary);
+}
+
+#start-screen li {
+    margin-bottom: 10px;
+}
+
+/* === 遊戲主佈局 === */
 .flex-layout {
     display: flex;
     gap: 40px;
     justify-content: center;
+    align-items: stretch;
+    width: 100%;
+    max-width: 900px;
 }
 
-/* 彈珠台 */
-#game-area {
-    text-align: center;
+#game-area,
+#qa-area {
     flex: 1;
 }
 
-canvas {
+/* === 彈珠台區域 === */
+#game-area {
+    text-align: center;
+}
+
+#plinko-canvas {
     background: #000;
     border-radius: var(--radius-ui);
     border: 2px solid var(--accent-strong);
@@ -99,71 +138,112 @@ canvas {
     box-shadow: 0 0 25px var(--accent-glow);
 }
 
-#game-area button {
-    padding: 10px 20px;
-    margin: 10px 0;
-    border-radius: 12px;
-    border: none;
-    background: var(--accent-strong);
-    color: #1a1a1a;
-    font-weight: 700;
-    cursor: pointer;
-    transition: transform 0.2s, background 0.2s;
+.game-controls p {
+    color: var(--text-secondary);
 }
 
-#game-area button:hover {
-    background: color-mix(in srgb, var(--accent-color) 90%, white 10%);
-    transform: translateY(-2px);
-}
-
-#chips {
+#chips-display {
     font-weight: 700;
+    font-size: 1.2em;
     color: var(--accent-strong);
 }
 
-/* 問答區 */
+#ball-result {
+    color: var(--accent-soft);
+    min-height: 1.2em;
+}
+
+/* === 問答區域 === */
 #qa-area {
-    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 #qa-area h2 {
     color: var(--accent-strong);
     text-shadow: 0 0 10px var(--accent-glow);
+    margin-top: 0;
+}
+
+#question-text {
+    color: var(--text-secondary);
+    min-height: 60px;
 }
 
 .options {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    margin: 20px 0;
+}
+
+/* === 按鈕風格 === */
+button {
+    padding: 12px 24px;
+    margin: 10px 0;
+    border-radius: 12px;
+    border: none;
+    background: var(--accent-strong);
+    color: #1a1a1a;
+    font-size: 1em;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+button:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--accent-color) 95%, white 5%);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px var(--accent-shadow);
+}
+
+button:disabled {
+    background: #4a4a4a;
+    color: #888;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
 }
 
 .options button {
     padding: 12px;
-    border-radius: 12px;
-    border: none;
     background: rgba(255, 255, 255, 0.08);
     color: var(--text-primary);
-    font-size: 16px;
     font-weight: 600;
-    cursor: pointer;
-    transition: all 0.25s ease;
     backdrop-filter: blur(10px) saturate(160%);
+    text-align: left;
+    border: 1px solid transparent;
 }
 
-.options button:hover {
-    background: var(--accent-strong);
-    color: #1a1a1a;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px color-mix(in srgb, var(--accent-color) 35%, transparent);
+.options button.selected {
+    border-color: var(--accent-strong);
+    background: var(--accent-soft);
+    color: #fff;
 }
 
-#result {
+.options button.correct {
+    background: var(--correct-color);
+    color: #000;
+    border-color: var(--correct-color);
+}
+
+.options button.wrong {
+    background: var(--wrong-color);
+    color: #fff;
+    border-color: var(--wrong-color);
+    opacity: 0.7;
+}
+
+#result-text {
     margin-top: 20px;
     font-weight: 600;
+    min-height: 50px;
     color: var(--accent-strong);
     text-shadow: 0 0 12px var(--accent-glow);
 }
 
+/* === 響應式設計 === */
 @media (max-width: 768px) {
     .flex-layout {
         flex-direction: column;
@@ -174,29 +254,18 @@ canvas {
     #game-area,
     #qa-area {
         width: 100%;
+        max-width: 450px;
     }
 }
 
-html,
-body {
-    /* 讓滾動軸浮在內容上方 */
-    overflow-y: overlay;
-    background-color: transparent;
-}
-
-/* WebKit／Blink 瀏覽器（Chrome／Edge／Safari） */
+/* === 自訂滾動軸 === */
 ::-webkit-scrollbar {
     width: 10px;
-    height: 10px;
     background: transparent;
-    /* 嘗試覆蓋基底 */
 }
 
 ::-webkit-scrollbar-track {
     background: transparent !important;
-    background-color: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -204,17 +273,12 @@ body {
     border-radius: 999px;
     border: 2px solid transparent;
     background-clip: padding-box;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    transition: background-color 0.25s ease, transform 0.25s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
     background-color: rgba(255, 255, 255, 0.25);
-    transform: scaleX(1.15);
 }
 
-/* Firefox */
 html {
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
