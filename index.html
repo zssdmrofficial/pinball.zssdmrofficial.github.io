@@ -6,33 +6,16 @@
     <title>張國問答 + 籌碼彈珠台</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <link rel="icon" type="image/x-icon" href="static/images/favicon.ico">
     <link rel="stylesheet" href="static/css/style.css" />
-
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+TC:wght@400;700&display=swap"
         rel="stylesheet" />
-
-    <!-- 背景動畫 -->
-    <svg style="position: fixed; width: 0; height: 0" aria-hidden="true">
-        <defs>
-            <filter id="liquid_glass_filter" x="-20%" y="-20%" width="140%" height="140%"
-                filterUnits="objectBoundingBox">
-                <feTurbulence type="fractalNoise" baseFrequency="0.01 0.015" numOctaves="2" seed="10" result="noise">
-                    <animate attributeName="baseFrequency" dur="16s" values="0.01 0.015; 0.015 0.01; 0.01 0.015"
-                        repeatCount="indefinite" />
-                </feTurbulence>
-                <feDisplacementMap in="SourceGraphic" in2="noise" scale="30" xChannelSelector="R"
-                    yChannelSelector="G" />
-            </filter>
-        </defs>
-    </svg>
 </head>
 
 <body>
-    <!-- 全螢幕背景 -->
+    <!-- 全螢幕背景 (請放入您的背景圖片) -->
     <div class="full-bg">
         <img src="static/images/background.png" alt="背景圖" />
     </div>
@@ -40,32 +23,47 @@
     <!-- 主容器 -->
     <div class="main-container" id="main-content">
 
-        <!-- 彈珠台 + 問答 -->
-        <section class="content-card flex-layout">
+        <!-- 起始畫面 -->
+        <div id="start-screen" class="content-card">
+            <h1>張國問答挑戰</h1>
+            <p>規則：</p>
+            <ul>
+                <li>點擊「投球」讓彈珠落下，賺取籌碼。</li>
+                <li>消耗 10 籌碼來回答一題問題。</li>
+                <li>答對可獲得 30 籌碼，答錯則失去 10 籌碼。</li>
+            </ul>
+            <button id="start-game-btn">開始挑戰</button>
+        </div>
+
+        <!-- 遊戲主畫面 -->
+        <section id="game-container" class="flex-layout hidden">
             <!-- 左邊：彈珠台 -->
             <div id="game-area">
-                <canvas id="pinballCanvas" width="300" height="500"></canvas>
-                <button id="drop-ball-btn">丟球</button>
-                <p>目前籌碼：<span id="chips">0</span></p>
+                <canvas id="plinko-canvas" width="300" height="450"></canvas>
+                <div class="game-controls">
+                    <button id="drop-ball-btn">投球！</button>
+                    <p>目前籌碼：<span id="chips-display">10</span></p>
+                    <p id="ball-result"></p>
+                </div>
             </div>
 
             <!-- 右邊：問答 -->
-            <div id="qa-area">
-                <h2 id="question">題目</h2>
-                <div class="options">
-                    <button data-choice="A">選項</button>
-                    <button data-choice="B">選項</button>
-                    <button data-choice="C">選項</button>
+            <div id="qa-area" class="content-card">
+                <h2 id="question-title">準備好了嗎？</h2>
+                <p id="question-text">點擊下方按鈕開始問答！</p>
+                <div id="options-container" class="options">
+                    <!-- 選項按鈕會由 JS 動態生成 -->
                 </div>
-                <p id="result"></p>
+                <div id="action-area">
+                    <button id="answer-question-btn" disabled>消耗 10 籌碼答題</button>
+                    <p id="result-text"></p>
+                </div>
             </div>
         </section>
 
     </div>
 
     <!-- JS -->
-    <script src="static/js/pinball.js"></script>
-    <script src="static/js/quiz.js"></script>
     <script src="static/js/main.js"></script>
 </body>
 
