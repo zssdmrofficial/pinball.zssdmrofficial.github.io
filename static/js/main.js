@@ -182,29 +182,6 @@ document.addEventListener('DOMContentLoaded', () => {
             endMessage.textContent = `您成功達到了 ${targetChips} 籌碼的目標！`;
         }
     }
-
-    // 新增: 檢查遊戲輸贏狀態 (修改版本)
-    function checkGameStatus() {
-        if (gameMode !== 'custom') return;
-
-        // 勝利條件
-        if (chips >= targetChips) {
-            triggerWin(); // 使用預設值 'chips'
-            return;
-        }
-
-        // 拯救/失敗條件
-        if (chips <= 0) {
-            bailoutCount++;
-            if (bailoutCount >= MAX_BAILOUTS) {
-                triggerLoss();
-            } else {
-                chips = BAILOUT_AMOUNT;
-                alert(`你的籌碼已歸零！系統贈送您 ${BAILOUT_AMOUNT} 籌碼。 (第 ${bailoutCount} 次拯救)`);
-                updateUI(); // 再次更新UI以顯示新的籌碼
-            }
-        }
-    }
     function loadNextQuestion() {
         const penalty = consecutiveWrongAnswers * CONSECUTIVE_WRONG_PENALTY;
         const currentCost = ANSWER_COST + penalty;
