@@ -21,18 +21,28 @@
 
     <div class="main-container" id="main-content">
 
+        <!-- 修改: 初始畫面改為模式選擇 -->
         <div id="start-screen" class="content-card">
-            <h1>張國問答挑戰</h1>
-            <p>規則：</p>
-            <ul>
-                <li>點擊「投球」讓彈珠落下，賺取或失去籌碼。</li>
-                <li>消耗籌碼來回答問題，注意時間限制！</li>
-                <li>答對可獲得獎勵，連續答錯懲罰會加重。</li>
-                <li>你可以使用籌碼購買道具，或加倍賭注！</li>
-            </ul>
-            <button id="start-game-btn">開始挑戰</button>
+            <h1>選擇遊戲模式</h1>
+            <div class="mode-selection">
+                <div class="mode-card">
+                    <h2>答題模式</h2>
+                    <p>專注於問答挑戰，沒有籌碼和時間壓力，純粹考驗你的知識！</p>
+                    <button id="start-quiz-mode-btn">開始答題</button>
+                </div>
+                <div class="mode-card">
+                    <h2>自訂挑戰模式</h2>
+                    <p>設定一個籌碼目標，利用彈珠台和答題技巧來達成它！有 2 次被拯救的機會。</p>
+                    <div class="custom-mode-setup">
+                        <label for="target-chips-input">目標籌碼 (預設 1000):</label>
+                        <input type="number" id="target-chips-input" value="1000" min="100" step="100">
+                    </div>
+                    <button id="start-custom-mode-btn">開始挑戰</button>
+                </div>
+            </div>
         </div>
 
+        <!-- 遊戲主容器 -->
         <section id="game-container" class="flex-layout hidden">
             <div id="game-area">
                 <canvas id="plinko-canvas" width="300" height="450"></canvas>
@@ -61,6 +71,13 @@
                 </div>
             </div>
         </section>
+
+        <!-- 新增: 遊戲結束畫面 -->
+        <div id="end-screen" class="content-card hidden">
+            <h2 id="end-title">遊戲結束</h2>
+            <p id="end-message">你的最終表現如何？</p>
+            <button id="restart-game-btn">重新開始</button>
+        </div>
 
     </div>
 
