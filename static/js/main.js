@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- DOM 元素獲取 ---
     const startScreen = document.getElementById('start-screen');
     const gameContainer = document.getElementById('game-container');
     const startGameBtn = document.getElementById('start-game-btn');
@@ -15,7 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const wagerBtn = document.getElementById('wager-btn');
     const bumperBtn = document.getElementById('bumper-btn');
 
-    // --- Canvas 彈珠台設定 ---
     const canvas = document.getElementById('plinko-canvas');
     const ctx = canvas.getContext('2d');
     const pegRadius = 5;
@@ -28,28 +26,24 @@ document.addEventListener('DOMContentLoaded', () => {
     let bumperActive = false;
     const BUMPER_COST = 15;
 
-    // --- 遊戲狀態與成本設定 ---
     let chips = 10;
     let questions = [];
     let currentQuestion = null;
     let selectedAnswer = null;
     let canDropBall = true;
 
-    // === 成本機制修改 ===
-    const DROP_BALL_COST = 2;       // 【機制1】投球成本
-    const WAGER_ACTIVATION_COST = 5; // 【機制2】加倍賭注的啟動成本
+    const DROP_BALL_COST = 2;
+    const WAGER_ACTIVATION_COST = 5;
     const ANSWER_COST = 10;
     const CORRECT_REWARD = 30;
-    const CONSECUTIVE_WRONG_PENALTY = 8; // 【機制3】強化連續答錯懲罰
+    const CONSECUTIVE_WRONG_PENALTY = 8;
 
-    // --- 時間與狀態控制 ---
     const QUESTION_TIME_LIMIT = 20;
     let timeLeft = QUESTION_TIME_LIMIT;
     let timerInterval = null;
     let consecutiveWrongAnswers = 0;
     let isWagerActive = false;
 
-    // --- 初始化函式 ---
     async function initializeGame() {
         await loadQuestions();
         setupPegs();
@@ -58,17 +52,15 @@ document.addEventListener('DOMContentLoaded', () => {
         updateUI();
     }
 
-    // --- 遊戲流程控制 ---
     startGameBtn.addEventListener('click', () => {
         startScreen.classList.add('hidden');
         gameContainer.classList.remove('hidden');
-        updateUI(); // 開始時立即更新一次UI，確保按鈕狀態正確
+        updateUI();
     });
 
     dropBallBtn.addEventListener('click', () => {
-        // 【機制1】實作：檢查是否有足夠籌碼投球
         if (canDropBall && chips >= DROP_BALL_COST) {
-            chips -= DROP_BALL_COST; // 扣除成本
+            chips -= DROP_BALL_COST;
             canDropBall = false;
             ballResult.textContent = `(成本: -${DROP_BALL_COST})`;
             dropBallBtn.disabled = true;
@@ -79,17 +71,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 vy: 0
             };
             animateBall();
-            updateUI(); // 更新籌碼顯示
+            updateUI();
         }
     });
 
     wagerBtn.addEventListener('click', () => {
-        // 【機制2】實作：啟動/取消加倍賭注
         if (!isWagerActive && chips >= WAGER_ACTIVATION_COST) {
             chips -= WAGER_ACTIVATION_COST;
             isWagerActive = true;
         } else {
-            // 如果玩家反悔，退還啟動成本
             if (isWagerActive) chips += WAGER_ACTIVATION_COST;
             isWagerActive = false;
         }
@@ -114,7 +104,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- 題庫處理 ---
     async function loadQuestions() {
         try {
             const response = await fetch('assets/QA.json');
@@ -176,12 +165,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const correct = !isTimeout && selectedAnswer === currentQuestion.answer;
         const wagerMultiplier = isWagerActive ? 2 : 1;
 
-        // 【機制4】實作：計時獎勵，根據剩餘時間調整獎勵
         let timeBonus = 0;
         if (timeLeft > 10) {
-            timeBonus = 10; // 快速回答獎勵
+            timeBonus = 10;
         } else if (timeLeft <= 5 && timeLeft > 0) {
-            timeBonus = -5; // 慢速回答微懲罰
+            timeBonus = -5;
         }
         const finalReward = (CORRECT_REWARD + timeBonus) * wagerMultiplier;
 
@@ -204,13 +192,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         currentQuestion = null;
         selectedAnswer = null;
-        // 如果玩家在答題後沒有取消加倍，也要重置狀態
         isWagerActive = false;
         wagerBtn.classList.remove('active');
         updateUI();
     }
 
-    // --- 計時器功能 ---
     function startTimer() {
         timeLeft = QUESTION_TIME_LIMIT;
         timerDisplay.textContent = timeLeft;
@@ -234,11 +220,9 @@ document.addEventListener('DOMContentLoaded', () => {
         timerDisplay.classList.remove('low-time');
     }
 
-    // --- UI 更新 ---
     function updateUI() {
         chipsDisplay.textContent = chips;
 
-        // 更新投球按鈕狀態
         if (canDropBall) {
             dropBallBtn.disabled = chips < DROP_BALL_COST;
         }
@@ -254,7 +238,6 @@ document.addEventListener('DOMContentLoaded', () => {
             answerQuestionBtn.disabled = chips < nextCost;
         }
 
-        // 更新賭注按鈕
         if (isWagerActive) {
             wagerBtn.textContent = `加倍中 (成本: ${WAGER_ACTIVATION_COST})`;
         } else {
@@ -262,12 +245,10 @@ document.addEventListener('DOMContentLoaded', () => {
             wagerBtn.disabled = chips < WAGER_ACTIVATION_COST;
         }
 
-        // 更新道具按鈕狀態
         bumperBtn.disabled = chips < BUMPER_COST || bumperActive;
         bumperBtn.textContent = bumperActive ? '保險桿已啟用' : `保險桿 (${BUMPER_COST})`;
     }
 
-    // --- 彈珠台物理與繪圖 ---
     function setupPegs() {
         const rows = 10;
         const cols = 7;
@@ -374,6 +355,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- 遊戲啟動 ---
     initializeGame();
 });

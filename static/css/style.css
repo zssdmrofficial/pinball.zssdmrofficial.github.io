@@ -1,29 +1,21 @@
 :root {
-    /* === 粉紅主題色票（統一色系） === */
     --accent-color: #ff8888;
-    /* 主粉紅：鮮明 */
     --accent-strong: color-mix(in srgb, var(--accent-color) 85%, white 15%);
     --accent-soft: color-mix(in srgb, var(--accent-color) 40%, white 10%);
     --accent-glow: color-mix(in srgb, var(--accent-color) 35%, transparent);
     --accent-shadow: color-mix(in srgb, var(--accent-color) 25%, black 45%);
 
-    /* === 文字與背景 === */
     --text-primary: #ffffff;
     --text-secondary: rgba(255, 255, 255, 0.78);
     --bg-dark-overlay: rgba(0, 0, 0, 0.55);
-    /* 微粉的卡片霧面底，保持可讀性 */
     --content-bg: rgba(255, 255, 255, 0.06);
 
-    /* === 狀態顏色 === */
     --correct-color: #49ffc2;
     --wrong-color: #ff6b6b;
 
-
-    /* === 圓角與版心 === */
     --radius-ui: 24px;
 }
 
-/* === 基本與背景設定 === */
 body,
 html {
     margin: 0;
@@ -75,7 +67,6 @@ html {
     display: none !important;
 }
 
-/* === 卡片風格 === */
 .content-card {
     background: var(--content-bg);
     backdrop-filter: blur(8px);
@@ -109,7 +100,6 @@ html {
     margin-bottom: 10px;
 }
 
-/* === 遊戲主佈局 === */
 .flex-layout {
     display: flex;
     gap: 40px;
@@ -124,7 +114,6 @@ html {
     flex: 1;
 }
 
-/* === 彈珠台區域 === */
 #game-area {
     text-align: center;
 }
@@ -153,7 +142,6 @@ html {
     min-height: 1.2em;
 }
 
-/* === 問答區域 === */
 #qa-area {
     display: flex;
     flex-direction: column;
@@ -178,7 +166,6 @@ html {
     margin: 20px 0;
 }
 
-/* === 按鈕風格 === */
 button {
     padding: 12px 24px;
     margin: 10px 0;
@@ -243,11 +230,9 @@ button:disabled {
     text-shadow: 0 0 12px var(--accent-glow);
 }
 
-/* === 響應式設計 === */
 @media (max-width: 768px) {
     .flex-layout {
         flex-direction: column;
-        /* 小螢幕改直排 */
         align-items: center;
     }
 
@@ -258,7 +243,6 @@ button:disabled {
     }
 }
 
-/* === 自訂滾動軸 === */
 ::-webkit-scrollbar {
     width: 10px;
     background: transparent;
@@ -284,9 +268,6 @@ html {
     scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
 
-/* === 新增元素樣式 === */
-
-/* 計時器 */
 #timer-display {
     position: absolute;
     top: 20px;
@@ -301,13 +282,11 @@ html {
     text-shadow: 0 0 10px var(--accent-glow);
 }
 
-/* 時間快到時的警告樣式 */
 #timer-display.low-time {
     color: var(--wrong-color);
     transform: scale(1.1);
 }
 
-/* 問答按鈕區塊 */
 .action-buttons {
     display: flex;
     gap: 10px;
@@ -316,10 +295,8 @@ html {
 
 #answer-question-btn {
     flex-grow: 1;
-    /* 讓答題按鈕佔據更多空間 */
 }
 
-/* 加倍賭注按鈕 */
 #wager-btn {
     padding: 12px;
     background: rgba(255, 255, 255, 0.08);
@@ -335,7 +312,6 @@ html {
     box-shadow: 0 0 15px var(--accent-glow);
 }
 
-/* 道具商店 */
 #item-shop {
     display: flex;
     justify-content: center;
