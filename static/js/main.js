@@ -1,7 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // 畫面元素
     const startScreen = document.getElementById('start-screen');
     const gameContainer = document.getElementById('game-container');
-    const startGameBtn = document.getElementById('start-game-btn');
+    const endScreen = document.getElementById('end-screen');
+    const startQuizModeBtn = document.getElementById('start-quiz-mode-btn');
+    const startCustomModeBtn = document.getElementById('start-custom-mode-btn');
+    const targetChipsInput = document.getElementById('target-chips-input');
+    const restartGameBtn = document.getElementById('restart-game-btn');
+
+    // 遊戲元素
+    const gameArea = document.getElementById('game-area');
+    const qaArea = document.getElementById('qa-area');
     const dropBallBtn = document.getElementById('drop-ball-btn');
     const chipsDisplay = document.getElementById('chips-display');
     const answerQuestionBtn = document.getElementById('answer-question-btn');
@@ -13,7 +22,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const timerDisplay = document.getElementById('timer-display');
     const wagerBtn = document.getElementById('wager-btn');
     const bumperBtn = document.getElementById('bumper-btn');
+    const endTitle = document.getElementById('end-title');
+    const endMessage = document.getElementById('end-message');
 
+    // 彈珠台相關
     const canvas = document.getElementById('plinko-canvas');
     const ctx = canvas.getContext('2d');
     const pegRadius = 5;
@@ -26,37 +38,77 @@ document.addEventListener('DOMContentLoaded', () => {
     let bumperActive = false;
     const BUMPER_COST = 15;
 
+    // 遊戲狀態變數
     let chips = 10;
     let questions = [];
     let currentQuestion = null;
     let selectedAnswer = null;
     let canDropBall = true;
+    let consecutiveWrongAnswers = 0;
+    let isWagerActive = false;
 
+    // 新增: 遊戲模式與輸贏機制變數
+    let gameMode = null; // 'quiz' 或 'custom'
+    let targetChips = 1000;
+    let bailoutCount = 0;
+    const MAX_BAILOUTS = 3; // 包含最後一次失敗，所以是拯救2次
+    const BAILOUT_AMOUNT = 20;
+
+    // 遊戲常數
     const DROP_BALL_COST = 2;
     const WAGER_ACTIVATION_COST = 5;
     const ANSWER_COST = 10;
     const CORRECT_REWARD = 30;
     const CONSECUTIVE_WRONG_PENALTY = 8;
-
     const QUESTION_TIME_LIMIT = 20;
     let timeLeft = QUESTION_TIME_LIMIT;
     let timerInterval = null;
-    let consecutiveWrongAnswers = 0;
-    let isWagerActive = false;
 
+    // 初始化函式
     async function initializeGame() {
         await loadQuestions();
         setupPegs();
         setupObstacles();
         draw();
-        updateUI();
     }
 
-    startGameBtn.addEventListener('click', () => {
+    // 模式選擇事件監聽
+    startQuizModeBtn.addEventListener('click', () => {
+        startGame('quiz');
+    });
+
+    startCustomModeBtn.addEventListener('click', () => {
+        const customTarget = parseInt(targetChipsInput.value, 10);
+        if (!isNaN(customTarget) && customTarget >= 100) {
+            targetChips = customTarget;
+        } else {
+            targetChips = 1000; // 如果輸入無效，使用預設值
+        }
+        startGame('custom');
+    });
+
+    // 重新開始遊戲
+    restartGameBtn.addEventListener('click', () => {
+        location.reload(); // 最簡單的方式是重載頁面
+    });
+
+    function startGame(mode) {
+        gameMode = mode;
         startScreen.classList.add('hidden');
         gameContainer.classList.remove('hidden');
+
+        if (gameMode === 'quiz') {
+            // 答題模式: 隱藏籌碼和彈珠台相關元素
+            gameArea.classList.add('hidden');
+            wagerBtn.classList.add('hidden');
+            timerDisplay.classList.add('hidden');
+            document.querySelector('.game-controls p').classList.add('hidden'); // 隱藏"目前籌碼"文字
+        } else {
+            // 自訂模式: 正常顯示所有元素
+            qaArea.style.flex = '1'; // 確保QA區域寬度正常
+        }
         updateUI();
-    });
+    }
 
     dropBallBtn.addEventListener('click', () => {
         if (canDropBall && chips >= DROP_BALL_COST) {
@@ -106,6 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadQuestions() {
         try {
+            // 確保你的 QA.json 檔案放在名為 'assets' 的資料夾中
             const response = await fetch('assets/QA.json');
             if (!response.ok) throw new Error('無法讀取題庫檔案');
             questions = await response.json();
@@ -116,26 +169,66 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // 新增: 觸發勝利 (修改版本，可接受勝利原因)
+    function triggerWin(reason = 'chips') {
+        gameContainer.classList.add('hidden');
+        endScreen.classList.remove('hidden');
+        endTitle.textContent = '恭喜獲勝！';
+        endTitle.style.color = 'var(--correct-color)';
+
+        if (reason === 'quiz_complete') {
+            endMessage.textContent = `您已成功答完題庫中所有題目！`;
+        } else {
+            endMessage.textContent = `您成功達到了 ${targetChips} 籌碼的目標！`;
+        }
+    }
+
+    // 新增: 檢查遊戲輸贏狀態 (修改版本)
+    function checkGameStatus() {
+        if (gameMode !== 'custom') return;
+
+        // 勝利條件
+        if (chips >= targetChips) {
+            triggerWin(); // 使用預設值 'chips'
+            return;
+        }
+
+        // 拯救/失敗條件
+        if (chips <= 0) {
+            bailoutCount++;
+            if (bailoutCount >= MAX_BAILOUTS) {
+                triggerLoss();
+            } else {
+                chips = BAILOUT_AMOUNT;
+                alert(`你的籌碼已歸零！系統贈送您 ${BAILOUT_AMOUNT} 籌碼。 (第 ${bailoutCount} 次拯救)`);
+                updateUI(); // 再次更新UI以顯示新的籌碼
+            }
+        }
+    }
     function loadNextQuestion() {
         const penalty = consecutiveWrongAnswers * CONSECUTIVE_WRONG_PENALTY;
         const currentCost = ANSWER_COST + penalty;
 
-        if (chips < currentCost) return;
+        if (gameMode === 'custom' && chips < currentCost) return;
+
+        // 【主要修改處】
+        // 移除原先對 gameMode 的判斷，讓兩種模式在題目用盡時都觸發勝利畫面
         if (questions.length === 0) {
-            questionTitle.textContent = '恭喜！';
-            questionText.textContent = '您已答完所有題目！';
-            optionsContainer.innerHTML = '';
+            triggerWin('quiz_complete');
             return;
         }
 
-        chips -= currentCost;
+        if (gameMode === 'custom') {
+            chips -= currentCost;
+        }
         updateUI();
 
         const questionIndex = Math.floor(Math.random() * questions.length);
         currentQuestion = questions.splice(questionIndex, 1)[0];
         selectedAnswer = null;
 
-        questionTitle.textContent = `問題 (成本: ${currentCost})`;
+        const costText = gameMode === 'custom' ? ` (成本: ${currentCost})` : '';
+        questionTitle.textContent = `問題${costText}`;
         questionText.textContent = currentQuestion.question;
         resultText.textContent = '';
         optionsContainer.innerHTML = '';
@@ -154,11 +247,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         answerQuestionBtn.textContent = `確認答案`;
-        startTimer();
+        if (gameMode === 'custom') {
+            startTimer();
+        }
     }
-
     function checkAnswer(isTimeout = false) {
-        stopTimer();
+        if (gameMode === 'custom') {
+            stopTimer();
+        }
         const optionButtons = optionsContainer.querySelectorAll('button');
         optionButtons.forEach(btn => btn.disabled = true);
 
@@ -166,23 +262,27 @@ document.addEventListener('DOMContentLoaded', () => {
         const wagerMultiplier = isWagerActive ? 2 : 1;
 
         let timeBonus = 0;
-        if (timeLeft > 10) {
-            timeBonus = 10;
-        } else if (timeLeft <= 5 && timeLeft > 0) {
-            timeBonus = -5;
+        if (gameMode === 'custom') {
+            if (timeLeft > 10) {
+                timeBonus = 10;
+            } else if (timeLeft <= 5 && timeLeft > 0) {
+                timeBonus = -5;
+            }
         }
+
         const finalReward = (CORRECT_REWARD + timeBonus) * wagerMultiplier;
 
         if (correct) {
-            chips += finalReward;
-            resultText.textContent = `正確！獲得 ${finalReward} 籌碼！${currentQuestion.explanation}`;
+            const rewardText = gameMode === 'custom' ? `獲得 ${finalReward} 籌碼！` : '';
+            if (gameMode === 'custom') chips += finalReward;
+            resultText.textContent = `正確！${rewardText}說明：${currentQuestion.explanation}`;
             resultText.style.color = 'var(--correct-color)';
             consecutiveWrongAnswers = 0;
         } else {
             resultText.textContent = isTimeout ? `時間到！` : `答錯了。`;
             resultText.textContent += `正確答案是：${currentQuestion.answer}。說明：${currentQuestion.explanation}`;
             resultText.style.color = 'var(--wrong-color)';
-            consecutiveWrongAnswers++;
+            if (gameMode === 'custom') consecutiveWrongAnswers++;
         }
 
         optionButtons.forEach(btn => {
@@ -221,34 +321,83 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateUI() {
-        chipsDisplay.textContent = chips;
-
-        if (canDropBall) {
-            dropBallBtn.disabled = chips < DROP_BALL_COST;
-        }
-
-        const penalty = consecutiveWrongAnswers * CONSECUTIVE_WRONG_PENALTY;
-        const nextCost = ANSWER_COST + penalty;
-
-        if (currentQuestion) {
-            answerQuestionBtn.textContent = '確認答案';
-            answerQuestionBtn.disabled = !selectedAnswer;
+        // 修正後的程式碼
+        if (gameMode === 'quiz') {
+            // 答題模式下的UI更新
+            if (currentQuestion) {
+                answerQuestionBtn.textContent = '確認答案';
+                answerQuestionBtn.disabled = !selectedAnswer;
+            } else {
+                answerQuestionBtn.textContent = '開始答題';
+                answerQuestionBtn.disabled = false;
+            }
         } else {
-            answerQuestionBtn.textContent = `消耗 ${nextCost} 籌碼答題`;
-            answerQuestionBtn.disabled = chips < nextCost;
-        }
+            // 自訂模式下的UI更新
+            chipsDisplay.textContent = chips;
 
-        if (isWagerActive) {
-            wagerBtn.textContent = `加倍中 (成本: ${WAGER_ACTIVATION_COST})`;
-        } else {
-            wagerBtn.textContent = `加倍賭注`;
-            wagerBtn.disabled = chips < WAGER_ACTIVATION_COST;
-        }
+            if (canDropBall) {
+                dropBallBtn.disabled = chips < DROP_BALL_COST;
+            }
 
-        bumperBtn.disabled = chips < BUMPER_COST || bumperActive;
-        bumperBtn.textContent = bumperActive ? '保險桿已啟用' : `保險桿 (${BUMPER_COST})`;
+            const penalty = consecutiveWrongAnswers * CONSECUTIVE_WRONG_PENALTY;
+            const nextCost = ANSWER_COST + penalty;
+
+            if (currentQuestion) {
+                answerQuestionBtn.textContent = '確認答案';
+                answerQuestionBtn.disabled = !selectedAnswer;
+            } else {
+                answerQuestionBtn.textContent = `消耗 ${nextCost} 籌碼答題`;
+                answerQuestionBtn.disabled = chips < nextCost;
+            }
+
+            if (isWagerActive) {
+                wagerBtn.textContent = `加倍中 (成本: ${WAGER_ACTIVATION_COST})`;
+            } else {
+                wagerBtn.textContent = `加倍賭注`;
+                wagerBtn.disabled = chips < WAGER_ACTIVATION_COST || currentQuestion;
+            }
+
+            bumperBtn.disabled = chips < BUMPER_COST || bumperActive;
+            bumperBtn.textContent = bumperActive ? '保險桿已啟用' : `保險桿 (${BUMPER_COST})`;
+
+            // 每次UI更新時檢查遊戲狀態
+            checkGameStatus();
+        }
     }
 
+    // 新增: 檢查遊戲輸贏狀態
+    function checkGameStatus() {
+        if (gameMode !== 'custom') return;
+
+        // 勝利條件
+        if (chips >= targetChips) {
+            triggerWin();
+            return;
+        }
+
+        // 拯救/失敗條件
+        if (chips <= 0) {
+            bailoutCount++;
+            if (bailoutCount >= MAX_BAILOUTS) {
+                triggerLoss();
+            } else {
+                chips = BAILOUT_AMOUNT;
+                alert(`你的籌碼已歸零！系統贈送您 ${BAILOUT_AMOUNT} 籌碼。 (第 ${bailoutCount} 次拯救)`);
+                updateUI(); // 再次更新UI以顯示新的籌碼
+            }
+        }
+    }
+
+    // 新增: 觸發失敗
+    function triggerLoss() {
+        gameContainer.classList.add('hidden');
+        endScreen.classList.remove('hidden');
+        endTitle.textContent = '挑戰失敗';
+        endTitle.style.color = 'var(--wrong-color)';
+        endMessage.textContent = `您已經耗盡了所有的拯救機會。再接再厲！`;
+    }
+
+    // --- 彈珠台繪圖與動畫邏輯 (無變動) ---
     function setupPegs() {
         const rows = 10;
         const cols = 7;
