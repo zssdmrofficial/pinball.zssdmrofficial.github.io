@@ -188,8 +188,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (gameMode === 'custom' && chips < currentCost) return;
 
-        // 【主要修改處】
-        // 移除原先對 gameMode 的判斷，讓兩種模式在題目用盡時都觸發勝利畫面
         if (questions.length === 0) {
             triggerWin('quiz_complete');
             return;
@@ -210,7 +208,16 @@ document.addEventListener('DOMContentLoaded', () => {
         resultText.textContent = '';
         optionsContainer.innerHTML = '';
 
-        currentQuestion.options.forEach(option => {
+        // --- 【修改處】 ---
+        // 建立一個選項的複製並打亂順序 (Fisher-Yates shuffle)
+        const shuffledOptions = [...currentQuestion.options];
+        for (let i = shuffledOptions.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
+        }
+
+        // 使用打亂後的選項陣列來建立按鈕
+        shuffledOptions.forEach(option => {
             const button = document.createElement('button');
             button.textContent = option;
             button.disabled = false;
@@ -222,6 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             optionsContainer.appendChild(button);
         });
+        // --- 【修改結束】 ---
 
         answerQuestionBtn.textContent = `確認答案`;
         if (gameMode === 'custom') {
@@ -376,8 +384,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 彈珠台繪圖與動畫邏輯 (無變動) ---
     function setupPegs() {
-        const rows = 10;
-        const cols = 7;
+        const rows = 8;
+        const cols = 6;
         for (let row = 1; row < rows; row++) {
             const numPegs = cols + (row % 2 === 0 ? 0 : -1);
             const spacing = canvas.width / (numPegs + 1);
