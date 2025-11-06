@@ -28,9 +28,10 @@
             <h1>張國問答挑戰</h1>
             <p>規則：</p>
             <ul>
-                <li>點擊「投球」讓彈珠落下，賺取籌碼。</li>
-                <li>消耗 10 籌碼來回答一題問題。</li>
-                <li>答對可獲得 30 籌碼，答錯則失去 10 籌碼。</li>
+                <li>點擊「投球」讓彈珠落下，賺取或失去籌碼。</li>
+                <li>消耗籌碼來回答問題，注意時間限制！</li>
+                <li>答對可獲得獎勵，連續答錯懲罰會加重。</li>
+                <li>你可以使用籌碼購買道具，或加倍賭注！</li>
             </ul>
             <button id="start-game-btn">開始挑戰</button>
         </div>
@@ -42,6 +43,10 @@
                 <canvas id="plinko-canvas" width="300" height="450"></canvas>
                 <div class="game-controls">
                     <button id="drop-ball-btn">投球！</button>
+                    <!-- 道具商店 -->
+                    <div id="item-shop">
+                        <button id="bumper-btn" class="item-btn" title="在底部升起一道保險桿，防止落入負分區">保險桿 (15)</button>
+                    </div>
                     <p>目前籌碼：<span id="chips-display">10</span></p>
                     <p id="ball-result"></p>
                 </div>
@@ -49,13 +54,18 @@
 
             <!-- 右邊：問答 -->
             <div id="qa-area" class="content-card">
+                <!-- 計時器 -->
+                <div id="timer-display"></div>
                 <h2 id="question-title">準備好了嗎？</h2>
                 <p id="question-text">點擊下方按鈕開始問答！</p>
                 <div id="options-container" class="options">
                     <!-- 選項按鈕會由 JS 動態生成 -->
                 </div>
                 <div id="action-area">
-                    <button id="answer-question-btn" disabled>消耗 10 籌碼答題</button>
+                    <div class="action-buttons">
+                        <button id="wager-btn">加倍賭注</button>
+                        <button id="answer-question-btn" disabled>消耗 10 籌碼答題</button>
+                    </div>
                     <p id="result-text"></p>
                 </div>
             </div>

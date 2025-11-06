@@ -11,16 +11,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const optionsContainer = document.getElementById('options-container');
     const resultText = document.getElementById('result-text');
     const ballResult = document.getElementById('ball-result');
+    const timerDisplay = document.getElementById('timer-display');
+    const wagerBtn = document.getElementById('wager-btn');
+    const bumperBtn = document.getElementById('bumper-btn');
+
 
     // --- Canvas 彈珠台設定 ---
     const canvas = document.getElementById('plinko-canvas');
     const ctx = canvas.getContext('2d');
     const pegRadius = 5;
-    const pegColor = '#ffffff'; // 白色釘子依然適合
+    const pegColor = '#ffffff';
     const ballRadius = 8;
-    const ballColor = '#ff8888'; // 使用新的主粉紅色
+    const ballColor = '#ff8888';
     let pegs = [];
     let ball = null;
+    // 新增：動態障礙物
+    let movingObstacles = [];
+    // 新增：保險桿道具
+    let bumperActive = false;
+    const BUMPER_COST = 15;
+
 
     // --- 遊戲狀態 ---
     let chips = 10;
@@ -30,11 +40,19 @@ document.addEventListener('DOMContentLoaded', () => {
     let canDropBall = true;
     const ANSWER_COST = 10;
     const CORRECT_REWARD = 30;
+    // 新增：時間壓力
+    const QUESTION_TIME_LIMIT = 20; // 20秒答題時間
+    let timeLeft = QUESTION_TIME_LIMIT;
+    let timerInterval = null;
+    // 新增：懲罰與風險
+    let consecutiveWrongAnswers = 0;
+    let isWagerActive = false;
 
     // --- 初始化函式 ---
     async function initializeGame() {
         await loadQuestions();
         setupPegs();
+        setupObstacles(); // 初始化障礙物
         draw();
         updateUI();
     }
@@ -60,10 +78,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    wagerBtn.addEventListener('click', () => {
+        isWagerActive = !isWagerActive;
+        wagerBtn.classList.toggle('active', isWagerActive);
+        updateUI();
+    });
+
+    bumperBtn.addEventListener('click', () => {
+        if (chips >= BUMPER_COST) {
+            chips -= BUMPER_COST;
+            bumperActive = true;
+            updateUI();
+        }
+    });
+
     answerQuestionBtn.addEventListener('click', () => {
         if (!currentQuestion) {
             loadNextQuestion();
-            answerQuestionBtn.textContent = `確認答案`;
         } else if (selectedAnswer) {
             checkAnswer();
         }
@@ -83,24 +114,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function loadNextQuestion() {
+        // --- 懲罰與風險機制 ---
+        const wagerMultiplier = isWagerActive ? 2 : 1;
+        // 連續答錯，懲罰加重 (每錯1次成本+5)
+        const penalty = consecutiveWrongAnswers * 5;
+        const currentCost = (ANSWER_COST + penalty) * wagerMultiplier;
+
+        if (chips < currentCost) return; // 籌碼不足無法開始
         if (questions.length === 0) {
-            questionTitle.textContent = '恭喜！';
-            questionText.textContent = '您已完成所有題目！';
-            optionsContainer.innerHTML = '';
-            answerQuestionBtn.disabled = true;
+            // ... (遊戲結束邏輯)
             return;
         }
 
-        // 消耗籌碼
-        chips -= ANSWER_COST;
+        chips -= currentCost;
         updateUI();
 
-        // 載入新題目
         const questionIndex = Math.floor(Math.random() * questions.length);
         currentQuestion = questions.splice(questionIndex, 1)[0];
         selectedAnswer = null;
 
-        questionTitle.textContent = '問題';
+        questionTitle.textContent = `問題 (成本: ${currentCost})`;
         questionText.textContent = currentQuestion.question;
         resultText.textContent = '';
         optionsContainer.innerHTML = '';
@@ -108,54 +141,96 @@ document.addEventListener('DOMContentLoaded', () => {
         currentQuestion.options.forEach(option => {
             const button = document.createElement('button');
             button.textContent = option;
+            button.disabled = false; // 確保按鈕是啟用的
             button.addEventListener('click', () => {
-                // 移除其他按鈕的 selected class
                 optionsContainer.querySelectorAll('button').forEach(btn => btn.classList.remove('selected'));
-                // 新增 selected class
                 button.classList.add('selected');
                 selectedAnswer = option;
             });
             optionsContainer.appendChild(button);
         });
+
+        answerQuestionBtn.textContent = `確認答案`;
+        startTimer(); // 開始計時
     }
 
-    function checkAnswer() {
-        // 禁用所有選項按鈕
+    function checkAnswer(isTimeout = false) {
+        stopTimer();
         const optionButtons = optionsContainer.querySelectorAll('button');
         optionButtons.forEach(btn => btn.disabled = true);
 
-        const correct = selectedAnswer === currentQuestion.answer;
+        const correct = !isTimeout && selectedAnswer === currentQuestion.answer;
+        const wagerMultiplier = isWagerActive ? 2 : 1;
+        const currentReward = CORRECT_REWARD * wagerMultiplier;
+
         if (correct) {
-            chips += CORRECT_REWARD;
-            resultText.textContent = `正確！${currentQuestion.explanation}`;
+            chips += currentReward;
+            resultText.textContent = `正確！獲得 ${currentReward} 籌碼！${currentQuestion.explanation}`;
             resultText.style.color = 'var(--correct-color)';
+            consecutiveWrongAnswers = 0; // 重置連續答錯次數
         } else {
-            resultText.textContent = `答錯了。正確答案是：${currentQuestion.answer}。說明：${currentQuestion.explanation}`;
+            resultText.textContent = isTimeout ? `時間到！` : `答錯了。`;
+            resultText.textContent += `正確答案是：${currentQuestion.answer}。說明：${currentQuestion.explanation}`;
             resultText.style.color = 'var(--wrong-color)';
+            consecutiveWrongAnswers++; // 增加連續答錯次數
         }
 
-        // 標示正確與錯誤的選項
         optionButtons.forEach(btn => {
-            if (btn.textContent === currentQuestion.answer) {
-                btn.classList.add('correct');
-            } else if (btn.textContent === selectedAnswer) {
-                btn.classList.add('wrong');
-            }
+            if (btn.textContent === currentQuestion.answer) btn.classList.add('correct');
+            else if (btn.textContent === selectedAnswer) btn.classList.add('wrong');
         });
 
         currentQuestion = null;
         selectedAnswer = null;
-        answerQuestionBtn.textContent = '消耗 10 籌碼答下一題';
+        isWagerActive = false; // 重置賭注狀態
+        wagerBtn.classList.remove('active');
         updateUI();
     }
 
+    // --- 新增：計時器功能 ---
+    function startTimer() {
+        timeLeft = QUESTION_TIME_LIMIT;
+        timerDisplay.textContent = timeLeft;
+        timerDisplay.classList.remove('low-time');
+
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            timerDisplay.textContent = timeLeft;
+            if (timeLeft <= 5) {
+                timerDisplay.classList.add('low-time');
+            }
+            if (timeLeft <= 0) {
+                checkAnswer(true); // 時間到，以答錯論
+            }
+        }, 1000);
+    }
+
+    function stopTimer() {
+        clearInterval(timerInterval);
+        timerDisplay.textContent = '';
+        timerDisplay.classList.remove('low-time');
+    }
 
     // --- UI 更新 ---
     function updateUI() {
         chipsDisplay.textContent = chips;
-        answerQuestionBtn.disabled = chips < ANSWER_COST && !currentQuestion;
-    }
 
+        const wagerMultiplier = isWagerActive ? 2 : 1;
+        const penalty = consecutiveWrongAnswers * 5;
+        const nextCost = (ANSWER_COST + penalty) * wagerMultiplier;
+
+        if (currentQuestion) {
+            answerQuestionBtn.textContent = '確認答案';
+            answerQuestionBtn.disabled = !selectedAnswer;
+        } else {
+            answerQuestionBtn.textContent = `消耗 ${nextCost} 籌碼答題`;
+            answerQuestionBtn.disabled = chips < nextCost;
+        }
+
+        // 更新道具按鈕狀態
+        bumperBtn.disabled = chips < BUMPER_COST || bumperActive;
+        bumperBtn.textContent = bumperActive ? '保險桿已啟用' : `保險桿 (${BUMPER_COST})`;
+    }
 
     // --- 彈珠台物理與繪圖 ---
     function setupPegs() {
@@ -173,6 +248,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // 新增：設定動態障礙物
+    function setupObstacles() {
+        movingObstacles.push({
+            x: 50, y: 150, width: 80, height: 8, vx: 1.2
+        });
+        movingObstacles.push({
+            x: 200, y: 280, width: 60, height: 8, vx: -0.8
+        });
+    }
+
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -184,6 +269,18 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.fill();
         });
 
+        // 繪製動態障礙物
+        ctx.fillStyle = '#ffcc88';
+        movingObstacles.forEach(ob => {
+            ctx.fillRect(ob.x, ob.y, ob.width, ob.height);
+        });
+
+        // 繪製保險桿
+        if (bumperActive) {
+            ctx.fillStyle = '#49ffc2';
+            ctx.fillRect(0, canvas.height - 10, canvas.width, 10);
+        }
+
         // 繪製球
         if (ball) {
             ctx.fillStyle = ballColor;
@@ -192,25 +289,32 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.fill();
         }
 
-        // 繪製底部獎勵槽
-        const scores = [1, 5, 10, 2, 10, 5, 1];
+        // 繪製底部獎勵槽 (包含負分陷阱區)
+        const scores = [-10, 5, 15, 0, 15, 5, -10];
         const slotWidth = canvas.width / scores.length;
         ctx.font = '14px Noto Sans TC';
         scores.forEach((score, i) => {
-            ctx.fillStyle = '#fff';
-            ctx.fillText(score, i * slotWidth + slotWidth / 2 - 5, canvas.height - 15);
+            // 根據分數正負改變顏色
+            ctx.fillStyle = score < 0 ? '#ff6b6b' : '#fff';
+            ctx.fillText(score, i * slotWidth + slotWidth / 2 - (score >= 10 || score < 0 ? 10 : 5), canvas.height - 15);
         });
     }
 
     function animateBall() {
         if (!ball) return;
 
-        // 物理更新
-        ball.vy += 0.1; // 重力
+        // 更新障礙物位置
+        movingObstacles.forEach(ob => {
+            ob.x += ob.vx;
+            if (ob.x < 0 || ob.x + ob.width > canvas.width) {
+                ob.vx *= -1;
+            }
+        });
+
+        ball.vy += 0.1;
         ball.x += ball.vx;
         ball.y += ball.vy;
 
-        // 牆壁碰撞
         if (ball.x - ballRadius < 0 || ball.x + ballRadius > canvas.width) {
             ball.vx *= -0.8;
             ball.x = Math.max(ballRadius, Math.min(canvas.width - ballRadius, ball.x));
@@ -228,20 +332,38 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        // 動態障礙物碰撞
+        movingObstacles.forEach(ob => {
+            if (ball.x > ob.x && ball.x < ob.x + ob.width &&
+                ball.y + ballRadius > ob.y && ball.y - ballRadius < ob.y + ob.height) {
+                ball.vy *= -0.7; // 反彈
+                ball.y = ob.y - ballRadius; // 避免穿透
+            }
+        });
+
+        // 檢查保險桿
+        if (bumperActive && ball.y + ballRadius > canvas.height - 10) {
+            ball.vy *= -0.9; // 從保險桿反彈
+            ball.y = canvas.height - 10 - ballRadius;
+            bumperActive = false; // 保險桿使用一次後消失
+            updateUI();
+        }
+
+
         draw();
 
         // 檢查是否到底部
         if (ball.y > canvas.height) {
-            const scores = [1, 5, 10, 2, 10, 5, 1];
+            const scores = [-10, 5, 15, 0, 15, 5, -10];
             const slotWidth = canvas.width / scores.length;
             const slotIndex = Math.floor(ball.x / slotWidth);
-            const score = scores[slotIndex] || 1;
+            const score = scores[slotIndex] || 0;
 
             chips += score;
-            ballResult.textContent = `獲得 ${score} 籌碼！`;
+            ballResult.textContent = score >= 0 ? `獲得 ${score} 籌碼！` : `失去 ${-score} 籌碼！`;
             updateUI();
 
-            ball = null; // 球消失
+            ball = null;
             canDropBall = true;
             dropBallBtn.disabled = false;
         } else {
