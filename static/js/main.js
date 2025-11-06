@@ -455,8 +455,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const distance = Math.sqrt(dx * dx + dy * dy);
             if (distance < ballRadius + pegRadius) {
                 const angle = Math.atan2(dy, dx);
-                ball.vx = Math.cos(angle) * 2;
-                ball.vy = Math.sin(angle) * 2;
+                ball.vx = Math.cos(angle) * 1.5;
+                ball.vy = Math.sin(angle) * 1.5;
             }
         });
         movingObstacles.forEach(ob => {
