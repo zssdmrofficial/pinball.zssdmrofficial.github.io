@@ -31,52 +31,41 @@
     </svg>
 </head>
 
-<body class="no-native-scroll">
+<body>
     <!-- 全螢幕背景 -->
     <div class="full-bg">
         <img src="static/images/background.png" alt="背景圖" />
     </div>
 
-    <!-- 卷軸主容器 -->
-    <div id="lg-scroll-root" class="lg-scroll-root" role="region" aria-label="頁面內容可滾動區">
-        <div id="lg-scroll-content" class="lg-scroll-content">
-            <div class="main-container" id="main-content">
+    <!-- 主容器 -->
+    <div class="main-container" id="main-content">
 
-                <!-- 彈珠台 + 問答 -->
-                <section class="content-card flex-layout">
-                    <!-- 左邊：彈珠台 -->
-                    <div id="game-area">
-                        <canvas id="pinballCanvas" width="300" height="500"></canvas>
-                        <button id="drop-ball-btn">丟球</button>
-                        <p>目前籌碼：<span id="chips">0</span></p>
-                    </div>
-
-                    <!-- 右邊：問答 -->
-                    <div id="qa-area">
-                        <h2 id="question">題目</h2>
-                        <div class="options">
-                            <button data-choice="A">選項</button>
-                            <button data-choice="B">選項</button>
-                            <button data-choice="C">選項</button>
-                        </div>
-                        <p id="result"></p>
-                    </div>
-                </section>
-
+        <!-- 彈珠台 + 問答 -->
+        <section class="content-card flex-layout">
+            <!-- 左邊：彈珠台 -->
+            <div id="game-area">
+                <canvas id="pinballCanvas" width="300" height="500"></canvas>
+                <button id="drop-ball-btn">丟球</button>
+                <p>目前籌碼：<span id="chips">0</span></p>
             </div>
-        </div>
-    </div>
 
-    <!-- 自製 Liquid Glass 卷軸 -->
-    <div class="lg-scrollbar" aria-hidden="true">
-        <div class="lg-scrollbar-track"></div>
-        <div class="lg-scrollbar-thumb"></div>
+            <!-- 右邊：問答 -->
+            <div id="qa-area">
+                <h2 id="question">題目</h2>
+                <div class="options">
+                    <button data-choice="A">選項</button>
+                    <button data-choice="B">選項</button>
+                    <button data-choice="C">選項</button>
+                </div>
+                <p id="result"></p>
+            </div>
+        </section>
+
     </div>
 
     <!-- JS -->
     <script src="static/js/pinball.js"></script>
     <script src="static/js/quiz.js"></script>
-    <script src="static/js/lg-scrollbar.js"></script>
     <script src="static/js/main.js"></script>
 </body>
 
