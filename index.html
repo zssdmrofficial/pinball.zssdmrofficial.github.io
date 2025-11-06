@@ -15,15 +15,12 @@
 </head>
 
 <body>
-    <!-- 全螢幕背景 (請放入您的背景圖片) -->
     <div class="full-bg">
         <img src="static/images/background.png" alt="背景圖" />
     </div>
 
-    <!-- 主容器 -->
     <div class="main-container" id="main-content">
 
-        <!-- 起始畫面 -->
         <div id="start-screen" class="content-card">
             <h1>張國問答挑戰</h1>
             <p>規則：</p>
@@ -36,14 +33,11 @@
             <button id="start-game-btn">開始挑戰</button>
         </div>
 
-        <!-- 遊戲主畫面 -->
         <section id="game-container" class="flex-layout hidden">
-            <!-- 左邊：彈珠台 -->
             <div id="game-area">
                 <canvas id="plinko-canvas" width="300" height="450"></canvas>
                 <div class="game-controls">
                     <button id="drop-ball-btn">投球！</button>
-                    <!-- 道具商店 -->
                     <div id="item-shop">
                         <button id="bumper-btn" class="item-btn" title="在底部升起一道保險桿，防止落入負分區">保險桿 (15)</button>
                     </div>
@@ -52,14 +46,11 @@
                 </div>
             </div>
 
-            <!-- 右邊：問答 -->
             <div id="qa-area" class="content-card">
-                <!-- 計時器 -->
                 <div id="timer-display"></div>
                 <h2 id="question-title">準備好了嗎？</h2>
                 <p id="question-text">點擊下方按鈕開始問答！</p>
                 <div id="options-container" class="options">
-                    <!-- 選項按鈕會由 JS 動態生成 -->
                 </div>
                 <div id="action-area">
                     <div class="action-buttons">
@@ -73,7 +64,6 @@
 
     </div>
 
-    <!-- JS -->
     <script src="static/js/main.js"></script>
 </body>
 
