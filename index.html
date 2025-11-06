@@ -3,9 +3,10 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>張國問答 + 籌碼彈珠台</title>
+    <title>張師社會主義民主共和國 - 彈珠答題游戲</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <link rel="icon" type="image/x-icon" href="static/images/favicon.ico">
     <link rel="stylesheet" href="static/css/style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -26,18 +27,18 @@
             <h1>選擇遊戲模式</h1>
             <div class="mode-selection">
                 <div class="mode-card">
-                    <h2>答題模式</h2>
-                    <p>專注於問答挑戰，沒有籌碼和時間壓力，純粹考驗你的知識！</p>
-                    <button id="start-quiz-mode-btn">開始答題</button>
-                </div>
-                <div class="mode-card">
                     <h2>自訂挑戰模式</h2>
-                    <p>設定一個籌碼目標，利用彈珠台和答題技巧來達成它！有 2 次被拯救的機會。</p>
+                    <p>設定一個籌碼目標，利用彈珠台和答題技巧來達成它！有 2 次籌碼用光的機會。</p>
                     <div class="custom-mode-setup">
                         <label for="target-chips-input">目標籌碼 (預設 1000):</label>
                         <input type="number" id="target-chips-input" value="1000" min="100" step="100">
                     </div>
                     <button id="start-custom-mode-btn">開始挑戰</button>
+                </div>
+                <div class="mode-card">
+                    <h2>答題模式</h2>
+                    <p>專注於問答挑戰，沒有籌碼和時間壓力，純粹考驗你的知識！</p>
+                    <button id="start-quiz-mode-btn">開始答題</button>
                 </div>
             </div>
         </div>
