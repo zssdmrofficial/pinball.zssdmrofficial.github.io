@@ -156,18 +156,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // --- 【修改處】 ---
     async function loadQuestions() {
         try {
-            // 確保你的 QA.json 檔案放在名為 'assets' 的資料夾中
-            const response = await fetch('assets/QA.json');
+            // 確保你的 QA.jsonl 檔案放在名為 'assets' 的資料夾中
+            const response = await fetch('assets/QA.jsonl');
             if (!response.ok) throw new Error('無法讀取題庫檔案');
-            questions = await response.json();
+
+            const text = await response.text();
+            questions = text.split('\n')
+                .filter(line => line.trim() !== '') // 過濾掉空行
+                .map(line => JSON.parse(line)); // 將每一行文字解析為 JSON 物件
+
         } catch (error) {
             console.error(error);
             questionTitle.textContent = '錯誤';
             questionText.textContent = '無法載入題目，請檢查檔案路徑或格式。';
         }
     }
+    // --- 【修改結束】 ---
 
     // 新增: 觸發勝利 (修改版本，可接受勝利原因)
     function triggerWin(reason = 'chips') {
@@ -208,15 +215,12 @@ document.addEventListener('DOMContentLoaded', () => {
         resultText.textContent = '';
         optionsContainer.innerHTML = '';
 
-        // --- 【修改處】 ---
-        // 建立一個選項的複製並打亂順序 (Fisher-Yates shuffle)
         const shuffledOptions = [...currentQuestion.options];
         for (let i = shuffledOptions.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
         }
 
-        // 使用打亂後的選項陣列來建立按鈕
         shuffledOptions.forEach(option => {
             const button = document.createElement('button');
             button.textContent = option;
@@ -229,7 +233,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             optionsContainer.appendChild(button);
         });
-        // --- 【修改結束】 ---
 
         answerQuestionBtn.textContent = `確認答案`;
         if (gameMode === 'custom') {
@@ -306,9 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateUI() {
-        // 修正後的程式碼
         if (gameMode === 'quiz') {
-            // 答題模式下的UI更新
             if (currentQuestion) {
                 answerQuestionBtn.textContent = '確認答案';
                 answerQuestionBtn.disabled = !selectedAnswer;
@@ -317,7 +318,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 answerQuestionBtn.disabled = false;
             }
         } else {
-            // 自訂模式下的UI更新
             chipsDisplay.textContent = chips;
 
             if (canDropBall) {
@@ -345,22 +345,18 @@ document.addEventListener('DOMContentLoaded', () => {
             bumperBtn.disabled = chips < BUMPER_COST || bumperActive;
             bumperBtn.textContent = bumperActive ? '保險桿已啟用' : `保險桿 (${BUMPER_COST})`;
 
-            // 每次UI更新時檢查遊戲狀態
             checkGameStatus();
         }
     }
 
-    // 新增: 檢查遊戲輸贏狀態
     function checkGameStatus() {
         if (gameMode !== 'custom') return;
 
-        // 勝利條件
         if (chips >= targetChips) {
             triggerWin();
             return;
         }
 
-        // 拯救/失敗條件
         if (chips <= 0) {
             bailoutCount++;
             if (bailoutCount >= MAX_BAILOUTS) {
@@ -368,12 +364,11 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 chips = BAILOUT_AMOUNT;
                 alert(`你的籌碼已歸零！系統贈送您 ${BAILOUT_AMOUNT} 籌碼。 (第 ${bailoutCount} 次拯救)`);
-                updateUI(); // 再次更新UI以顯示新的籌碼
+                updateUI();
             }
         }
     }
 
-    // 新增: 觸發失敗
     function triggerLoss() {
         gameContainer.classList.add('hidden');
         endScreen.classList.remove('hidden');
@@ -382,7 +377,6 @@ document.addEventListener('DOMContentLoaded', () => {
         endMessage.textContent = `您已經耗盡了所有的拯救機會。再接再厲！`;
     }
 
-    // --- 彈珠台繪圖與動畫邏輯 (無變動) ---
     function setupPegs() {
         const rows = 8;
         const cols = 6;
