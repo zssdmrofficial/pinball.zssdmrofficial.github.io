@@ -283,3 +283,77 @@ html {
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
+
+/* === 新增元素樣式 === */
+
+/* 計時器 */
+#timer-display {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    font-size: 1.5em;
+    font-weight: 800;
+    color: var(--accent-strong);
+    background: rgba(0, 0, 0, 0.3);
+    padding: 5px 15px;
+    border-radius: 12px;
+    transition: color 0.3s ease, transform 0.3s ease;
+    text-shadow: 0 0 10px var(--accent-glow);
+}
+
+/* 時間快到時的警告樣式 */
+#timer-display.low-time {
+    color: var(--wrong-color);
+    transform: scale(1.1);
+}
+
+/* 問答按鈕區塊 */
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+#answer-question-btn {
+    flex-grow: 1;
+    /* 讓答題按鈕佔據更多空間 */
+}
+
+/* 加倍賭注按鈕 */
+#wager-btn {
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-secondary);
+    border: 1px solid transparent;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+#wager-btn.active {
+    background: var(--accent-soft);
+    border-color: var(--accent-strong);
+    color: #fff;
+    box-shadow: 0 0 15px var(--accent-glow);
+}
+
+/* 道具商店 */
+#item-shop {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.item-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+    font-size: 0.9em;
+    padding: 8px 15px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.item-btn:hover:not(:disabled) {
+    background: var(--accent-soft);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px var(--accent-shadow);
+}
