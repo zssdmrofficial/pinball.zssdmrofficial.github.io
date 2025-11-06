@@ -142,10 +142,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const button = document.createElement('button');
             button.textContent = option;
             button.disabled = false; // 確保按鈕是啟用的
+            // 修正後的程式碼
             button.addEventListener('click', () => {
                 optionsContainer.querySelectorAll('button').forEach(btn => btn.classList.remove('selected'));
                 button.classList.add('selected');
                 selectedAnswer = option;
+                updateUI(); // 新增這一行來更新按鈕狀態
             });
             optionsContainer.appendChild(button);
         });
