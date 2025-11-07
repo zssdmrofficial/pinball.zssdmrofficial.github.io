@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const endMessage = document.getElementById('end-message');
     const canvas = document.getElementById('plinko-canvas');
     const ctx = canvas.getContext('2d');
+
     const pegRadius = 5;
     const pegColor = '#ffffff';
     const ballRadius = 8;
@@ -53,9 +54,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const QUESTION_TIME_LIMIT = 20;
     let timeLeft = QUESTION_TIME_LIMIT;
     let timerInterval = null;
+    let isGameReady = false;
 
     async function initializeGame() {
+        startQuizModeBtn.disabled = true;
+        startCustomModeBtn.disabled = true;
+        startCustomModeBtn.textContent = '載入題庫中...';
+        startQuizModeBtn.textContent = '載入題庫中...';
+
         await loadQuestions();
+
+        if (isGameReady) {
+            startQuizModeBtn.disabled = false;
+            startCustomModeBtn.disabled = false;
+            startCustomModeBtn.textContent = '開始挑戰';
+            startQuizModeBtn.textContent = '開始答題';
+        }
+
         setupPegs();
         randomizeObstacles();
         draw();
@@ -103,6 +118,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     dropBallBtn.addEventListener('click', () => {
         if (canDropBall && chips >= DROP_BALL_COST) {
+            isWagerActive = false;
+            wagerBtn.classList.remove('active');
             shuffleScores();
             randomizeObstacles();
             chips -= DROP_BALL_COST;
@@ -156,10 +173,14 @@ document.addEventListener('DOMContentLoaded', () => {
             questions = text.split('\n')
                 .filter(line => line.trim() !== '')
                 .map(line => JSON.parse(line));
+            if (questions.length === 0) {
+                throw new Error('題庫檔案為空。');
+            }
+            isGameReady = true;
         } catch (error) {
             console.error(error);
-            questionTitle.textContent = '錯誤';
-            questionText.textContent = '無法載入題目，請檢查檔案路徑或格式。';
+            startScreen.innerHTML = `<h1>發生錯誤</h1><p style="color: var(--wrong-color);">無法載入遊戲所需題庫，請檢查 assets/QA.jsonl 檔案是否存在且內容正確。建議您重新整理頁面。</p>`;
+            isGameReady = false;
         }
     }
 
@@ -179,10 +200,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const penalty = consecutiveWrongAnswers * CONSECUTIVE_WRONG_PENALTY;
         const currentCost = ANSWER_COST + penalty;
         if (gameMode === 'custom' && chips < currentCost) return;
+
         if (questions.length === 0) {
-            triggerWin('quiz_complete');
+            if (gameMode === 'quiz') {
+                triggerWin('quiz_complete');
+            } else {
+                triggerLoss('挑戰失敗', `您已答完所有題目，但未能達成 ${targetChips} 籌碼的目標。`);
+            }
             return;
         }
+
         if (gameMode === 'custom') {
             chips -= currentCost;
         }
@@ -269,6 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 timerDisplay.classList.add('low-time');
             }
             if (timeLeft <= 0) {
+                stopTimer();
                 checkAnswer(true);
             }
         }, 1000);
@@ -339,18 +367,19 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 const message = chips <= 0 ? `你的籌碼已歸零！` : `你的籌碼不足以進行任何操作！`;
                 chips = BAILOUT_AMOUNT;
+                consecutiveWrongAnswers = 0;
                 alert(`${message} 系統贈送您 ${BAILOUT_AMOUNT} 籌碼。 (第 ${bailoutCount} 次拯救)`);
                 updateUI();
             }
         }
     }
 
-    function triggerLoss() {
+    function triggerLoss(title = '挑戰失敗', message = '您已經耗盡了所有的拯救機會。再接再厲！') {
         gameContainer.classList.add('hidden');
         endScreen.classList.remove('hidden');
-        endTitle.textContent = '挑戰失敗';
+        endTitle.textContent = title;
         endTitle.style.color = 'var(--wrong-color)';
-        endMessage.textContent = `您已經耗盡了所有的拯救機會。再接再厲！`;
+        endMessage.textContent = message;
     }
 
     function setupPegs() {
