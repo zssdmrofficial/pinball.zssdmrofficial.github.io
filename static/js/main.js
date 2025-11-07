@@ -323,7 +323,16 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (chips < DROP_BALL_COST) {
+        const penalty = consecutiveWrongAnswers * CONSECUTIVE_WRONG_PENALTY;
+        const nextAnswerCost = ANSWER_COST + penalty;
+
+        const canPerformAnyAction =
+            (chips >= DROP_BALL_COST && canDropBall) ||
+            (chips >= nextAnswerCost && !currentQuestion) ||
+            (chips >= WAGER_ACTIVATION_COST && !currentQuestion && !isWagerActive) ||
+            (chips >= BUMPER_COST && !bumperActive);
+
+        if (!canPerformAnyAction) {
             bailoutCount++;
             if (bailoutCount >= MAX_BAILOUTS) {
                 triggerLoss();
