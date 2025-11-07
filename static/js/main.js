@@ -316,7 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function checkGameStatus() {
-        if (gameMode !== 'custom') return;
+        if (gameMode !== 'custom' || currentQuestion) return;
 
         if (chips >= targetChips) {
             triggerWin();
