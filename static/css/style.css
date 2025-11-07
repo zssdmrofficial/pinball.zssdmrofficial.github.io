@@ -75,7 +75,6 @@ html {
     box-shadow: 0 2px 15px color-mix(in srgb, var(--accent-color) 16%, transparent);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     border: 1px solid rgba(255, 255, 255, 0.15);
-    /* [統一] 邊框樣式 */
 }
 
 .content-card:hover {
@@ -83,7 +82,6 @@ html {
     box-shadow: 0 8px 26px color-mix(in srgb, var(--accent-color) 35%, transparent);
 }
 
-/* 模式選擇樣式 */
 #start-screen {
     text-align: center;
     max-width: 650px;
@@ -104,10 +102,8 @@ html {
     display: flex;
     flex-direction: column;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    /* [新增] 過渡效果 */
 }
 
-/* [新增] 模式卡片的懸停效果 */
 .mode-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 20px color-mix(in srgb, var(--accent-color) 25%, transparent);
@@ -139,11 +135,9 @@ html {
 .custom-mode-setup input {
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.15);
-    /* [統一] 邊框樣式 */
     color: white;
     padding: 8px;
     border-radius: 12px;
-    /* [統一] 圓角與按鈕一致 */
     width: 100px;
     text-align: center;
     font-family: inherit;
@@ -252,11 +246,9 @@ button:disabled {
     border: 1px solid transparent;
 }
 
-/* [新增] 選項按鈕的懸停效果 */
 .options button:hover:not(:disabled) {
     background: rgba(255, 255, 255, 0.15);
     transform: translateY(-3px);
-    /* 統一懸停位移 */
     box-shadow: 0 6px 16px var(--accent-shadow);
 }
 
@@ -350,12 +342,9 @@ button:disabled {
     background: var(--accent-soft);
     color: #fff;
     transform: translateY(-3px);
-    /* [統一] 懸停位移 */
     box-shadow: 0 6px 16px var(--accent-shadow);
-    /* [統一] 懸停陰影 */
 }
 
-/* 結束畫面樣式 */
 #end-screen {
     text-align: center;
     max-width: 450px;
