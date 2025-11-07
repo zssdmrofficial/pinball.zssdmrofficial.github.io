@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const startCustomModeBtn = document.getElementById('start-custom-mode-btn');
     const targetChipsInput = document.getElementById('target-chips-input');
     const restartGameBtn = document.getElementById('restart-game-btn');
-
     const gameArea = document.getElementById('game-area');
     const qaArea = document.getElementById('qa-area');
     const dropBallBtn = document.getElementById('drop-ball-btn');
@@ -22,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const bumperBtn = document.getElementById('bumper-btn');
     const endTitle = document.getElementById('end-title');
     const endMessage = document.getElementById('end-message');
-
     const canvas = document.getElementById('plinko-canvas');
     const ctx = canvas.getContext('2d');
     const pegRadius = 5;
@@ -34,9 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let movingObstacles = [];
     let bumperActive = false;
     const BUMPER_COST = 15;
-
     let currentScores = [-10, 5, 15, 15, 15, 5, 15];
-
     let chips = 10;
     let questions = [];
     let currentQuestion = null;
@@ -44,13 +40,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let canDropBall = true;
     let consecutiveWrongAnswers = 0;
     let isWagerActive = false;
-
     let gameMode = null;
     let targetChips = 1000;
     let bailoutCount = 0;
     const MAX_BAILOUTS = 3;
     const BAILOUT_AMOUNT = 20;
-
     const DROP_BALL_COST = 2;
     const WAGER_ACTIVATION_COST = 5;
     const ANSWER_COST = 10;
@@ -89,7 +83,6 @@ document.addEventListener('DOMContentLoaded', () => {
         gameMode = mode;
         startScreen.classList.add('hidden');
         gameContainer.classList.remove('hidden');
-
         if (gameMode === 'quiz') {
             gameArea.classList.add('hidden');
             wagerBtn.classList.add('hidden');
@@ -112,7 +105,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (canDropBall && chips >= DROP_BALL_COST) {
             shuffleScores();
             randomizeObstacles();
-
             chips -= DROP_BALL_COST;
             canDropBall = false;
             ballResult.textContent = `(成本: -${DROP_BALL_COST})`;
@@ -355,16 +347,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const verticalSpacing = 35;
         const horizontalSpacing = 40;
         const jitterAmount = 1.5;
-
         pegs = [];
-
         const numPegsPerRow = 10;
-
         for (let row = 0; row < rows; row++) {
             const offsetX = (row % 2 === 0) ? 0 : horizontalSpacing / 2;
             const totalRowWidth = (numPegsPerRow - 1) * horizontalSpacing;
             const startX = (canvas.width - totalRowWidth) / 2 + offsetX;
-
             for (let col = 0; col < numPegsPerRow; col++) {
                 const baseX = startX + col * horizontalSpacing;
                 const baseY = yStart + row * verticalSpacing;
@@ -414,17 +402,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const slotWidth = canvas.width / currentScores.length;
         ctx.font = '14px Noto Sans TC';
         currentScores.forEach((score, i) => {
-            // 繪製分數文字
             ctx.fillStyle = score < 0 ? '#ff6b6b' : '#fff';
             ctx.fillText(score, i * slotWidth + slotWidth / 2 - (score >= 10 || score < 0 ? 10 : 5), canvas.height - 15);
-
-            // 從第二個分數開始，為每個區間左側繪製隔板
             if (i > 0) {
-                ctx.strokeStyle = '#ffffff'; // 隔板顏色
-                ctx.lineWidth = 1;         // 隔板寬度
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1;
                 ctx.beginPath();
-                ctx.moveTo(i * slotWidth, canvas.height - 40); // 線條起點 (高度可調整)
-                ctx.lineTo(i * slotWidth, canvas.height);      // 線條終點
+                ctx.moveTo(i * slotWidth, canvas.height - 40);
+                ctx.lineTo(i * slotWidth, canvas.height);
                 ctx.stroke();
             }
         });
