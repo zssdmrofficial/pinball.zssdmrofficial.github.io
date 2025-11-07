@@ -317,17 +317,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function checkGameStatus() {
         if (gameMode !== 'custom') return;
+
         if (chips >= targetChips) {
             triggerWin();
             return;
         }
-        if (chips <= 0) {
+
+        if (chips < DROP_BALL_COST) {
             bailoutCount++;
             if (bailoutCount >= MAX_BAILOUTS) {
                 triggerLoss();
             } else {
+                const message = chips <= 0 ? `你的籌碼已歸零！` : `你的籌碼不足以進行任何操作！`;
                 chips = BAILOUT_AMOUNT;
-                alert(`你的籌碼已歸零！系統贈送您 ${BAILOUT_AMOUNT} 籌碼。 (第 ${bailoutCount} 次拯救)`);
+                alert(`${message} 系統贈送您 ${BAILOUT_AMOUNT} 籌碼。 (第 ${bailoutCount} 次拯救)`);
                 updateUI();
             }
         }
